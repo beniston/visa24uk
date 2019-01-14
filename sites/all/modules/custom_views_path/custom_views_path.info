@@ -1,0 +1,4 @@
+name = Custom Views Path
+description = A module that changes Views Path.
+core = 7.x
+package = My Modules

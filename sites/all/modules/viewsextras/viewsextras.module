@@ -1,0 +1,245 @@
+<?php
+/**
+ * This module is a proof of concept for various enhancements to the views ui.  There is much room for 
+ * architectural improvement, but all listsed features should be fully functional. 
+ * It currently provides the following features:
+ * 
+ * 1. Display 'Items per page' in pager instead of the exposed form
+ * 2. Display selected exposed filters in a collapsible 'Advanced options' fieldset
+ * 3. Remove options with no results from exposed filters and optionally display the result count 
+ *    for each remaining filter option 
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function viewsextras_views_api() {
+  return array(
+    'api' => 3.0,
+  );
+}
+
+/**
+ * Implements hook_init
+ */
+function viewsextras_init() {
+  $prefix = drupal_get_path('module', 'viewsextras') . '/viewsextras.';
+  drupal_add_js($prefix . 'js');
+  drupal_add_css($prefix . 'css');
+}
+
+/**
+ * Implements hook theme_registry_alter
+ * @param unknown_type $items
+ */
+function viewsextras_theme_registry_alter(&$items) {
+  $items['views_exposed_form']['preprocess functions'][] = 'viewsextras_views_exposed_form_preprocess'; //preprocess views so we can wrap exposed filter forms
+}
+
+/**
+ * views exposed form preprocess callback
+ * @param $vars
+ */
+function viewsextras_views_exposed_form_preprocess(&$vars) {
+  //check for settings
+  if (!isset($vars['form']['#parameters']['veft_settings'])) return;
+  $settings = $vars['form']['#parameters']['veft_settings'];
+  $view = $vars['form']['#parameters']['veft_view'];
+
+  //move selected widgets into fieldset value or the widget array
+  $fieldset_value = '';
+  foreach ($vars['widgets'] as $id => $widget) {
+    if (in_array(str_replace('filter-', '', $id), $settings['fieldset'], TRUE)) {
+      $fieldset_value .= viewsextras_theme_widget($id, $widget);
+    }
+    else {
+      $widgets[$id] = $widget;
+    }
+  }
+  
+  //move selected controls into fieldset value or the widget array
+  foreach (viewsextras_controls() as $id => $widget) {
+    if (in_array($id, $settings['fieldset'], TRUE) && isset($vars[$id])) {
+      $fieldset_value .= viewsextras_theme_widget($id, $vars[$id]);
+    }
+    elseif (isset($vars[$id])) {
+      $widgets[$id] = (object) array('widget' => $vars[$id], 'id' => $id);
+    }
+    $vars[$id] = '';  
+  }  
+
+  if (isset($fieldset_value)) {
+    //if we have fieldset content and it's not in the default state, force the fieldset to be expanded
+    $collapsed = $settings['fieldset_collapsed'];
+    if ($collapsed) {
+      foreach ($view->exposed_input as $input_key => $input_val) {
+        //TODO we check that we're not in the default state instead of just checking for empty and all
+        if (!empty($input_val) && is_string($input_val) && strtolower($input_val) != 'all' && in_array($input_key, $settings['fieldset'], TRUE)) {
+          $collapsed = FALSE;
+          break;
+        }
+      }
+      foreach ($view->argument as $arg_key => $arg) {
+        $val = $view->args[$arg->position];
+        if (!empty($val) && $val != $arg->options['wildcard'] && in_array($arg_key, $settings['fieldset'], TRUE)) {
+          $collapsed = FALSE;
+          break;
+        }
+      }   
+    }
+    
+    //add fieldset to the widget array
+    $element = array(
+      '#title' => $settings['fieldset_title'],
+      '#collapsible' => TRUE,
+      '#collapsed' => $collapsed,
+      '#value' => $fieldset_value,
+      '#parents' => array(),
+      '#children' => NULL,
+    );
+    $element = form_process_fieldset($element, $form_state);
+    drupal_add_js('misc/collapse.js');
+    $key = $settings['fieldset_collapsed_inline'] ? 'advanced-fieldset veft-collapsed' : 'advanced-fieldset';
+    $widgets[$key] = (object) array('widget' => theme('fieldset', array('element' => $element)), 'id' => $key);
+  }
+  $vars['widgets'] = $widgets;
+}
+
+/**
+ * add markup to a exposed form widget
+ * @param $id
+ * @param $widget
+ */
+function viewsextras_theme_widget($id, $widget) {
+  $value = isset($widget->widget) ? $widget->widget : $widget; 
+  if ($value) {
+    $fieldset_value = "<div class=\"views-exposed-widget views-widget-$id\">";
+    if (!empty($widget->label)) {
+      $fieldset_value .= "<label for=\"{$widget->id}\">$widget->label</label>";
+    }
+    $fieldset_value .= "<div class=\"views-widget\">$value</div>";
+    $fieldset_value .= "</div>";
+  }
+  return $fieldset_value;
+}
+
+/**
+ * array of view exposed form controls that can be moved to our advanced fieldset
+ */
+function viewsextras_controls() {
+  return array(
+    'sort_by' => t('Sort By'), 
+    'sort_order' => t('Sort Order'), 
+    'items_per_page' => t('Items Per Page'), 
+    'offset' => t('Offset'), 
+    'button' => t('Submit Button'), 
+    'reset_button' => t('Reset Button')
+  );
+}
+
+/**
+ * Implements hook_views_query_alter
+ * @param unknown_type $view
+ * @param unknown_type $query
+ */
+function viewsextras_views_query_alter(&$view, &$query) {
+  //if this query is to build our filter options, make alterations 
+  if (isset($view->veft_filter_object)) {
+    //add views field so we can group by it    
+    $table = $view->veft_filter_object->table;
+    $real_field = $view->veft_filter_object->real_field;
+    if ($rel = $view->veft_filter_object->options['relationship']) { //prepend relationship prefix if one exits
+      if ($rel != 'none') {
+        $table = $view->relationship[$rel]->alias . '_' . $table; 
+      }
+    }
+    $view->veft_filter_object->alias = $view->query->add_field($table, $real_field);
+    
+    //add a groupby for the current veft filter    
+    //add_groupby doesn't work here so we add it in pre_execute instead of this: 
+    //$view->query->add_groupby($view->veft_filter_object->alias);
+    
+    if (isset($view->veft_filter_count)) { //indicates we want to get the group by counts to use later in hook_views_post_execute
+      $view->query->add_field(NULL, 'count(*)', 'count'); 
+    }
+    
+    //kill any distinct settings, we're using group by
+    $view->query->set_distinct(FALSE);
+    $view->query->no_distinct = TRUE;
+  }
+}
+
+/**
+ * Implements hook_views_pre_execute
+ * @param $view
+ */
+function viewsextras_views_pre_execute(&$view) {
+  //add our group by here since it doesn't work to set it in the query alter hook
+  if (isset($view->veft_filter_object)) { 
+    $query = &$view->build_info['query'];
+    $query->groupBy($view->veft_filter_object->alias);
+    //dpm((string) $query);  
+  }
+}
+
+/**
+ * Implements hook_views_post_execute
+ * @param unknown_type $view
+ */
+function viewsextras_views_post_execute(&$view) { 
+  if (isset($view->veft_filter_object)) {
+    foreach($view->result as $row) {
+      //add to the veft option array based on our view results
+      $val = $label = $row->{$view->veft_filter_object->alias};
+      if (empty($val)) continue;
+      
+      if (isset($view->veft_filter_formitem['#options'][$val])) {
+        $label = $view->veft_filter_formitem['#options'][$val];
+      }
+      
+      if($view->veft_filter_count) {
+        $label .=  ' (' . $row->count . ')';
+      }
+      
+      $view->veft_filter_options[$val] = $label;      
+    } 
+  }
+}
+
+/**
+ * Helper function to reduce #options arrays (that can contain arrays or objects).
+ * @see form_select_options()
+ *
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $keys
+ *  array of keys of the options array to reduce to.
+ *
+ * @return
+ *  array of options for select & co, see FAPI #options.
+ */
+function _viewsextras_filterops_reduce($options, $keys) {
+  $return_options = array();
+  if (!empty($options)) {
+    foreach ($options as $id => $option) {
+      // option is an optgroup, so check the optgroup children
+      if (is_array($option)) {
+        $result = _viewsextras_filterops_reduce($option, $keys);
+        if (!empty($return)) $return_options[$id] = $result;
+      }
+      // is an object, and could contain multiple items
+      elseif (is_object($option)) {
+        $result = _viewsextras_filterops_reduce($option->option, $keys);
+        if (!empty($result)) {
+          $option->option = $result;
+          $return_options[$id] = $option;
+        }
+      }
+      // default key => string relation
+      elseif (isset($keys[$id])) {
+        $return_options[$id] = $keys[$id];
+      }
+    }
+  }
+  return $return_options;
+}

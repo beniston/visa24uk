@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function custom_views_path_views_pre_view(&$view, &$display_id, &$args) {
+  switch ($view->name) {
+    case 'apply_for_a_visa' : // 'accueil' - replace this with actual view name used for http://www.mysite.fr/accueil?localite=
+      // Get exposed filters value
+      $filter_input = $view->get_exposed_input();
+      $term_name = $filter_input['country']; // 'localite' - replace this with actual exposed filter name
+      // Get term id from term name
+      $term_array = taxonomy_get_term_by_name($term_name);
+      $term = reset($term_array);
+      // Set exposed filter value to new one
+      $view->exposed_input['country'] = $term->tid; // 'localite' - replace this with actual exposed filter name 
+      break;
+  }
+}

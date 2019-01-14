@@ -1,0 +1,111 @@
+;Theme info
+name = PROBES
+description = Drupal 7
+package = Core
+version = VERSION
+core = 7.x
+screenshot = 'screenshot.png'
+
+; Add a style sheet
+stylesheets[all][] = css/bootstrap.min.css
+stylesheets[all][] = css/style.css
+stylesheets[all][] = css/reset.css
+stylesheets[all][] = css/font-awesome/css/font-awesome.min.css
+stylesheets[all][] = css/simple-line-icons.css
+stylesheets[all][] = css/et-line-font/et-line-font.css
+stylesheets[all][] = css/responsive-leyouts.css
+stylesheets[all][] = js/yamm/yamm.css
+stylesheets[all][] = js/yamm/menu.css
+stylesheets[all][] = js/masterslider/style/masterslider.css
+stylesheets[all][] = js/masterslider/skins/default/style1.css
+stylesheets[all][] = js/masterslider/style/style2.css
+stylesheets[all][] = js/cubeportfolio/css/cubeportfolio.min.css
+stylesheets[all][] = js/form/css/sky-forms.css
+stylesheets[all][] = js/animations/css/animations.min.css
+stylesheets[all][] = js/owl-carousel/owl.carousel.css
+stylesheets[all][] = js/owl-carousel/owl.theme.css
+stylesheets[all][] = js/owl-carousel/owl.transitions.css
+stylesheets[all][] = js/countdown/simplyCountdown.theme.losange.css
+stylesheets[all][] = css/update.css
+
+; Add a script
+scripts[] = js/jquery.min.js
+scripts[] = js/jquery.js
+scripts[] = js/bootstrap.min.js
+scripts[] = js/masterslider/jquery.easing.min.js
+scripts[] = js/masterslider/masterslider.min.js
+scripts[] = js/cubeportfolio/jquery-latest.min.js
+scripts[] = js/cubeportfolio/jquery.cubeportfolio.min.js
+scripts[] = js/cubeportfolio/main.js
+scripts[] = js/animations/animations.min.js
+scripts[] = js/animations/appear.min.js
+scripts[] = js/style-switcher/jquery-1.js
+scripts[] = js/style-switcher/styleselector.js
+scripts[] = js/yamm/sticky.js
+scripts[] = js/owl-carousel/owl.carousel.js
+scripts[] = js/owl-carousel/custom.js
+scripts[] = js/scrolltotop/totop.js
+scripts[] = js/aninum/jquery.animateNumber.min.js
+scripts[] = js/countdown/simplyCountdown.js
+scripts[] = js/jquery.easing.js
+scripts[] = js/skroll/sKroll.min.js
+scripts[] = js/update.js
+
+;Core regions
+
+
+regions[topbar] = 'Top bar'
+regions[home_header] = 'Home header'
+regions[right_header] = 'Right header layout 3'
+regions[right_header5] = 'Right header layout 5'
+regions[shopping_cart] = 'Shopping Cart'
+regions[main_menu] = 'Main menu'
+regions[side_menu] = 'Side menu'
+regions[slider] = 'Slider'
+regions[content] = 'Main Content'
+regions[sidebar] = 'Sidebar'
+regions[page_section] = 'Page Section'
+regions[section] = 'Section'
+regions[section_one] = 'Section Onepage'
+regions[shop_sidebar] = 'Shop sidebar'
+regions[footer_header] = 'Footer header'
+regions[footer] = 'Footer'
+regions[footer2] = 'Footer layout 2'
+regions[footer3] = 'Footer layout 3'
+regions[footer4] = 'Footer layout 4'
+regions[footer5] = 'Footer layout 5'
+
+regions[footer_first] = 'Footer first'
+regions[footer_second] = 'Footer second'
+regions[footer_third] = 'Footer third'
+regions[footer_fourth] = 'Footer fourth'
+
+regions[footer5_center] = 'Footer 5 center'
+regions[footer_copyright] = 'Footer copyright'
+
+
+regions[highlighted] = 'highlighted '
+regions[sidebar_first] = 'Sidebar first '
+
+
+;Features (core settings)
+features[] = 'logo'
+features[] = 'name'
+
+features[] = 'slogan'
+features[] = 'node_user_picture'
+features[] = 'comment_user_picture'
+features[] = 'comment_user_verification'
+features[] = 'favicon'
+features[] = 'go_to_top_button'
+features[] = 'secondary_menu'
+
+;Breadcrumb
+settings[breadcrumb_display] = 'yes'
+settings[breadcrumb_separator] = ' &#187; '
+settings[breadcrumb_home] = 1
+
+
+version = "7.x"
+project = "PROBES"
+datestamp = "1365027012"

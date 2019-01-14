@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * @file
+ * Installation information for the Views URL alias (node) module.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function views_url_alias_node_enable() {
+  module_load_include('module', 'views_url_alias');
+
+  views_url_alias_node_rebuild();
+}
+
+/**
+ * Implements hook_install().
+ */
+function views_url_alias_node_install() {
+  // Set the weight to 2 so that this module executes after pathauto.
+  db_update('system')
+    ->expression('weight', 2)
+    ->condition('name', 'views_url_alias_node')
+    ->execute();
+}
+
+/**
+ * Implements hook_schema().
+ */
+function views_url_alias_node_schema() {
+  return array(
+    'views_url_alias_node' => array(
+      'description' => t("A second url alias table for only node aliases used by views."),
+      'fields' => array(
+        'nid' => array(
+          'description' => 'The related {node}.nid for the url alias.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0
+        ),
+        'alias' => array(
+          'description' => 'The alias for this path; e.g. title-of-the-story.',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => ''
+        ),
+      ),
+      'index' => array(
+        'nid' => array('nid'),
+        'nid_alias' => array('nid', 'alias')),
+      'foreign keys' => array(
+        'nid' => array(
+          'table' => 'node',
+          'columns' => array('nid' => 'nid'),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Allow duplicate values for nid and nid_alias indexes.
+ */
+function views_url_alias_node_update_7001() {
+  db_drop_primary_key('views_url_alias_node', 'nid');
+  db_add_index(       'views_url_alias_node', 'nid', array('nid'));
+  db_drop_unique_key('views_url_alias_node', 'nid_alias');
+  db_add_index(      'views_url_alias_node', 'nid_alias', array('nid', 'alias'));
+}

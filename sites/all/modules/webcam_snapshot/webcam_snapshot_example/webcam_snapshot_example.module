@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Hook implementations for Webcam Snapshot demo module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function webcam_snapshot_example_menu() {
+  return array(
+    'webcam_snapshot/example' => array(
+      'title' => 'Webcam Snapshot Example',
+      'description' => 'Form API Field Demonstration.',
+      'file' => 'webcam_snapshot_example.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('webcam_snapshot_example_form'),
+      'access arguments' => array('access webcam snapshot demonstration'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function webcam_snapshot_example_permission() {
+  return array('access webcam snapshot demonstration' => array('title' => 'Access webcam snapshot demonstration'));
+}

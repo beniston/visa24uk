@@ -1,0 +1,33 @@
+<?php
+	function nodetype_color_form_node_type_form_alter(&$form, &$form_state) {
+    // Define field set in additional settings group
+	if(isset($form['#node_type']) && $form['#node_type']->type == 'blog') {
+		$form['advanced'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Color settings'),
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
+			'#weight' => 10,
+			'#group' => 'additional_settings',
+		);
+		// Add checkbox option
+		$form['advanced']['color_option'] = array(
+			'#type' => 'radios',
+			'#title' => t('Select a color'),
+			'#options' => array(
+				'blue.css' => t('Blue'),
+				'green.css' => t('Green'),
+				'lightblue.css' => t('Light blue'),
+				'lightgreen.css|' => t('Light green'),
+				'light-red.css' => t('Light red'),
+				'olive.css' => t('Olive'),
+				'orange.css' => t('Orange'),
+				'sea.css' => t('Sea'),
+				'violet.css' => t('Violet'),
+			),
+		);
+		// Set default value from automatically saved config variable
+		$form['advanced']['color_option']['#default_value'] = variable_get('color_option_' . $form['#node_type']->type, 1);
+	}
+}
+?>

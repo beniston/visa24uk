@@ -1,0 +1,3 @@
+core = "7.x"
+description = "Node type color setting. select color for content type "
+name = "Node type color setting"

@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * Implementation of hook_block_info()
+ */
+function nv_twitter_block_info() {
+    $blocks['widget_twitter'] = array(
+        'info' => t('Twitter Widget'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+    return $blocks;
+}
+
+function nv_twitter_preprocess_block(&$vars) {
+  drupal_add_css(drupal_get_path('module','nv_twitter').'/css/twitter-styles.css');
+	drupal_add_js(drupal_get_path('module','nv_twitter').'/js/twitterfeed.js');
+}
+
+/**
+ * Implementation of hook_block_view()
+ */
+function nv_twitter_block_view($delta = '') {
+	$block = array();
+    $block['subject'] = t('Twitter Widget');
+	$block['content'] = array(
+		'#theme' => 'widget_twitter',
+		'#settings' => array(
+			'widget_twitter_profile' => variable_get('widget_twitter_profile', 'dajy'),
+			'widget_twitter_display_limit' => variable_get('widget_twitter_display_limit', 2),
+		),
+	);
+    return $block;
+}
+
+/**
+ * Implementation of hook_block_configure()
+ */
+function nv_twitter_block_configure($delta = '') {
+    $form = array();
+	$form['widget_twitter_profile'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Your twitter profile'),
+		'#default_value' => variable_get('widget_twitter_profile', 'dajy'),
+		'#description' => t('Eg: dajy')
+	);
+
+	$form['widget_twitter_display_limit'] = array(
+		'#type' => 'select',
+		'#title' => t('Number of recent feed twitter items to display'),
+		'#default_value' => variable_get('widget_twitter_display_limit', 2),
+		'#options' => drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)),
+	);
+    return $form;
+}
+
+/**
+ * Implementation of hook_block_save()
+ */
+function nv_twitter_block_save($delta = '', $edit = array()) {
+	variable_set('widget_twitter_profile', $edit['widget_twitter_profile']);
+	variable_set('widget_twitter_display_limit', $edit['widget_twitter_display_limit']);
+}
+
+/**
+ * Implementation of hook_theme()
+ * 
+ */
+function nv_twitter_theme($existing, $type, $theme, $path) {
+    return array(
+        'widget_twitter' => array(
+            'variables' => array('settings' => array('widget_twitter_profile' => NULL, 'widget_twitter_display_limit' => NULL)),
+            'template' => 'widget_twitter'
+        ),
+    );
+}
+?>

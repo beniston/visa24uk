@@ -1,0 +1,103 @@
+.form-radios{
+	width:100%;
+	float:left;
+	margin-top:60px!important;
+	clear:both;
+}
+.form-radios input[type=radio]{
+	margin-right:15px;
+	cursor: pointer;
+	background: #e1e1e1;
+}
+.form-radios .form-item{
+	width: 70px;
+	margin: 0 30px 90px 0!important;
+	float: left;
+}
+.form-radios .form-item label{
+	margin-top: -70px!important;
+	border: 2px solid #fff!important;
+	outline: 1px solid #ddd!important;
+	position: absolute!important;
+	display: block;
+	width: 70px;
+	height: 0px;
+	line-height: 30px;
+	padding-top: 70px!important;
+	cursor: pointer;
+	text-align: center;
+	color: #444;
+	border: 1px solid #fff;
+	outline: 2px solid #a3af7f;
+	font-weight: bold;
+	background:#333
+}
+.form-item label[for="edit-built-in-skins-bluecss"] { background: #009ff0; }
+.form-item label[for="edit-built-in-skins-greencss"] { background: #449d44; }
+.form-item label[for="edit-built-in-skins-lightbluecss"] { background: #1ab4e1; }
+.form-item label[for="edit-built-in-skins-lightgreencss"] { background: #91c400; }
+.form-item label[for="edit-built-in-skins-light-redcss"] { background: #f05d6b; }
+.form-item label[for="edit-built-in-skins-olivecss"] { background: #45be84; }
+.form-item label[for="edit-built-in-skins-orangecss"] { background: #f67b00; }
+.form-item label[for="edit-built-in-skins-redcss"] { background: #ff2023; }
+.form-item label[for="edit-built-in-skins-seacss"] { background: #1cbac8; }
+.form-item label[for="edit-built-in-skins-violetcss"] { background: #9b76ee; }
+.form-item label[for="edit-built-in-skins-my-sincss"] { background: #feb41c; }
+.form-item label[for="edit-built-in-skins-niagaracss"] { background: #16a085; }
+.form-item label[for="edit-built-in-skins-orangecss"] { background: #f96015; }
+.form-item label[for="edit-built-in-skins-pastel-orangecss"] { background: #ffb546; }
+.form-item label[for="edit-built-in-skins-pastel-redcss"] { background: #ff6d6d; }
+.form-item label[for="edit-built-in-skins-pastel-red2css"] { background: #fe6367; }
+.form-item label[for="edit-built-in-skins-rich-electric-bluecss"] { background: #0091ea; }
+.form-item label[for="edit-built-in-skins-rodeo-dustcss"] { background: #c7b29b; }
+.form-item label[for="edit-built-in-skins-suncss"] { background: #feb010; }
+.form-item label[for="edit-built-in-skins-sunglocss"] { background: #d86d65; }
+
+
+.form-item label[for="edit-built-in-skins-twinecss"] { background: #c59d5f; }
+.form-item label[for="edit-built-in-skins-ucla-goldcss"] { background: #ffb600; }
+.form-item label[for="edit-built-in-skins-yellowcss"] { background: #f39c12; }
+.form-item label[for="edit-built-in-skins-zestcss"] { background: #e67e22; }
+.form-item label[for="edit-background-image-imagesbg-theme5png"] { background-image: url('../../images/bg-theme/5.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme6png"] { background-image: url('../../images/bg-theme/6.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme7png"] { background-image: url('../../images/bg-theme/7.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme8png"] { background-image: url('../../images/bg-theme/8.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme9png"] { background-image: url('../../images/bg-theme/9.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme10png"] { background-image: url('../../images/bg-theme/10.png'); }
+.form-item label[for="edit-background-image-imagesbg-theme11png"] { background-image: url('../../images/bg-theme/11.png'); }
+.form-item label[for="edit-background-image-imagesbg-themenonepng"] { background-image: url('../../images/bg-theme/none.jpg'); }
+.form-item label[for="edit-background-image-imagespatternspattern13jpg"] { background-image: url('../../images/patterns/pattern13.jpg'); }
+.form-item label[for="edit-background-image-imagespatternspattern14jpg"] { background-image: url('../../images/patterns/pattern14.jpg'); }
+.form-item label[for="edit-background-image-imagespatternspattern15jpg"] { background-image: url('../../images/patterns/pattern15.jpg'); }
+.form-item label[for="edit-background-image-imagespatternsdefaultjpg"] { background-image: url('../../images/patterns/none.jpg'); }
+
+
+
+.form-item label[for="edit-background-for-boxed-layout-none-background"] { background-color:#FFF!important }
+.form-item label[for="edit-layout-style-wide"] { background:url(../../images/fullwidth.jpg) no-repeat; }
+.form-item label[for="edit-layout-style-boxed"] { background:url(../../images/boxed.jpg) center center; }
+.form-item label[for="edit-layout-style-boxed-margin"] { background:url(../../images/boxed.jpg) center center; }
+.form-item label[for="edit-header-style-header1"] { background:none; }
+.form-item label[for="edit-background-for-boxed-layout-diagmonds"] { background:url(../bg/diagmonds.jpg) }
+
+.form-item label[for="edit-background-for-boxed-layout-triangles"] { background:url(../bg/triangles.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-black-thread"] { background:url(../bg/black_thread.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-checkered-pattern"] { background:url(../bg/checkered_pattern.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-black-mamba"] { background:url(../bg/black_mamba.jpg) }
+
+.form-item label[for="edit-background-for-boxed-layout-back-pattern"] { background:url(../bg/back_pattern.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-vichy"] { background:url(../bg/vichy.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-diamond-upholstery"] { background:url(../bg/diamond_upholstery.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-lyonnette"] { background:url(../bg/lyonnette.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-graphy"] { background:url(../bg/graphy.jpg) }
+.form-item label[for="edit-background-for-boxed-layout-subtlenet2"] { background:url(../bg/subtlenet2.jpg) }
+
+
+.form-radios .form-item-active label{
+	border: 1px solid #fff!important;
+	outline: 2px solid #a3af7f!important;
+	font-weight: bold!important;
+}
+.form-item .form-item{
+	padding:15px 0px!important;
+}

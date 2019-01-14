@@ -1,0 +1,401 @@
+<?php
+
+/**
+ * Implement hook_menu().
+ */
+function drupaletexp_animation_menu() {
+  $items = array();
+  $items['admin/drupaletexp/drupaletexp_animation'] = array(
+      'title' => t('Animation settings'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('drupaletexp_animation_admin_settings'),
+      'access arguments' => array('administer onthisdate settings'),
+      'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+function drupaletexp_animation_admin_settings() {
+  $form['drupaletexp_animation_pages_init_action'] = array(
+      '#type' => 'radios',
+      '#title' => t('Enable animate on specific pages '),
+      '#options' => array(
+          'page_enable' => t('Load only on the listed pages.'),
+          'page_disable' => t('Load on every page except the listed pages.')
+      ),
+      '#default_value' => variable_get('drupaletexp_animation_pages_init_action', 'page_disable'),
+  );
+  $form['drupaletexp_animation_pages_list'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Pages'),
+      '#description' => t('List one page per line as Drupal paths.  The * character is a wildcard.  Example paths are "node/add/page" and "node/add/*".  Use <front> to match the front page.'),
+      '#default_value' => variable_get('drupaletexp_animation_pages_list','')
+  );
+  return system_settings_form($form);
+}
+
+/*
+ * Implement hook_init().
+ */
+
+function drupaletexp_animation_init() {
+  if (drupaletexp_animation_exclude_these_paths() != 1) {
+    $module_path = drupal_get_path('module', 'drupaletexp_animation');
+    $library = libraries_get_libraries();
+    if (isset($library['appear'])) {
+      $path = $library['appear'];
+      drupal_add_js($path . '/jquery.appear.js');
+      drupal_add_js($module_path . '/js/drupaletexp_animation.js');
+      drupal_add_css($module_path . '/css/animate.css');
+	  drupal_add_css($module_path . '/v/bootstrap/css/bootstrap.min.css');
+    }
+  }
+}
+
+/**
+ * Return TRUE if current path is disabled for animate
+ */
+function drupaletexp_animation_exclude_these_paths() {
+  $action = variable_get('drupaletexp_animation_pages_init_action', 'page_disable');
+  $page_list = variable_get('drupaletexp_animation_pages_list', '');
+
+  if (!empty($page_list)) {
+    // Retrieve Drupal alias for the current path (if exists).
+    $alias = drupal_get_path_alias($_GET['q']);
+
+    if (drupal_match_path($_GET['q'], $page_list) || drupal_match_path($alias, $page_list)) {
+      return ($action == 'page_disable' ? 1 : 0);
+    }
+  }
+
+  return ($action == 'page_disable' ? 0 : 1);
+}
+
+/*
+ * Implement hook_form_alter()
+ */
+
+function drupaletexp_animation_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'block_admin_configure' || $form_id == 'block_add_block_form') {
+    $form['drupaletexp_block_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Drupalet Block Settings',
+        '#weight' => 0,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_animation'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Block Animation',
+        '#weight' => 0,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_animation']['drupaletexp_animate'] = array(
+        '#type' => 'select',
+        '#title' => t('Appears animate'),
+        '#options' => _drupaletexp_animation_animations(),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_animate'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_animation']['drupaletexp_block_background_image'] = array(
+        '#tree' => TRUE,
+        '#title' => t('Background image'),
+        '#type' => 'media',
+        '#description' => t('The uploaded image will be displayed on the page unless it is marked as "removed".'),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_background_image'),
+        '#media_options' => array(
+            'global' => array(
+                'types' => array(
+                    'image' => 'image',
+                ),
+                'schemes' => array(
+                    'public' => 'public',
+                ),
+                'file_extensions' => 'png gif jpg jpeg',
+                'max_filesize' => '1 MB',
+                'uri_scheme' => 'public',
+            ),
+        ),
+    );
+	
+	$form['drupaletexp_block_settings']['drupaletexp_animation']['drupaletexp_block_background_position'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Background position'),
+		'#maxlength'=> 20,
+		'#size'=> 20,
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_background_position'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_animation']['drupaletexp_block_background_image_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Background image type'),
+        '#options' => array('default' => 'Default', 'parallax' => 'Parallax', 'fixed' => 'Fixed'),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_background_image_type'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_custom_style'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Block Custom Style'),
+        '#weight' => 1,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    );
+	$form['drupaletexp_block_settings']['drupaletexp_custom_style']['drupaletexp_block_background_color'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Background color'),
+		'#maxlength'=> 7,
+		'#size'=> 10,
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_background_color'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_custom_style']['drupaletexp_block_text_align'] = array(
+        '#type' => 'select',
+        '#title' => t('Text align'),
+        '#options' => array('default' => 'Default', 'left' => 'Left', 'center' => 'Center', 'right' => 'Right'),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_text_align'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_custom_style']['drupaletexp_block_padding'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Padding'),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_padding'),
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_custom_style']['drupaletexp_block_margin'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Margin'),
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_margin'),
+    );
+	$form['drupaletexp_block_settings']['drupaletexp_advanced_block_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Advanced Block Settings'),
+        '#weight' => 2,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    );
+	$form['drupaletexp_block_settings']['drupaletexp_advanced_block_settings']['drupaletexp_block_title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Title display for onepage menu'),
+		'#size'=> 25,
+        '#default_value' => _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_title'),
+    );
+	
+	
+    $form['drupaletexp_block_settings']['drupaletexp_responsive_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Block Responsive Settings'),
+        '#weight' => 3,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+    );
+    $form['drupaletexp_block_settings']['drupaletexp_responsive_settings']['drupaletexp_block_responsive'] = array(
+        '#type' => 'checkboxes',
+        '#title' => 'Responsive settings',
+        '#options' => array(
+            'hphone' => 'Hidden on Phone',
+            'vphone' => 'Visible on Phone',
+            'htablet' => 'Hidden on Tablet',
+            'vtablet' => 'Visible on Tablet',
+            'hdesktop' => 'Hidden on Desktop',
+            'vdesktop' => 'Visible on Desktop'
+        ),
+        '#default_value' => (_drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_responsive')) ? _drupaletexp_animation_variable_get($form['module']['#value'], $form['delta']['#value'], 'drupaletexp_block_responsive') : array(),
+    );
+    $form['#submit'][] = 'drupaletexp_animation_block_configure_form_submit';
+  }
+}
+
+function drupaletexp_animation_block_configure_form_submit($form, $form_state) {
+  $values = $form_state['values'];
+  if ($values['drupaletexp_animate']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_animate', $values['drupaletexp_animate']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_animate', NULL);
+  }
+  if (isset($values['drupaletexp_block_background_image']) && $values['drupaletexp_block_background_image'] && !empty($values['drupaletexp_block_background_image'])) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_image', $values['drupaletexp_block_background_image']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_image', NULL);
+  }
+   if ($values['drupaletexp_block_background_image_type']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_image_type', $values['drupaletexp_block_background_image_type']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_image_type', NULL);
+  }
+   if ($values['drupaletexp_block_background_position']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_position', $values['drupaletexp_block_background_position']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_position', '0% 0%');
+  }
+   if ($values['drupaletexp_block_background_color']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_color', $values['drupaletexp_block_background_color']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_background_color', NULL);
+  }
+  if ($values['drupaletexp_block_title']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_title', $values['drupaletexp_block_title']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_title', NULL);
+  }
+  
+  if ($values['drupaletexp_block_text_align']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_text_align', $values['drupaletexp_block_text_align']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_text_align', NULL);
+  }
+  if ($values['drupaletexp_block_padding']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_padding', $values['drupaletexp_block_padding']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_padding', NULL);
+  }
+  if ($values['drupaletexp_block_margin']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_margin', $values['drupaletexp_block_margin']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_margin', NULL);
+  }
+  
+  if ($values['drupaletexp_block_responsive']) {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_responsive', $values['drupaletexp_block_responsive']);
+  } else {
+    _drupaletexp_animation_variable_set($values['module'], $values['delta'], 'drupaletexp_block_responsive', NULL);
+  }
+}
+
+function drupaletexp_animation_preprocess_block(&$vars) {
+  $vars['content_attributes_array']['class'][] = 'content';
+  $block = $vars['elements']['#block'];
+  $module = $block->module;
+  $delta = $block->delta;
+  $animate = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_animate');
+  $background_image = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_background_image');
+  $background_image_type = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_background_image_type');
+  $background_color = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_background_color');
+  $background_position = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_background_position');
+  $text_align = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_text_align');
+  $block_title = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_title');
+  $padding = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_padding');
+  $margin = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_margin');
+  if (!empty($content_class)) {
+    $vars['content_attributes_array']['class'][] = $content_class;
+  }
+  $responsive = _drupaletexp_animation_variable_get($module, $delta, 'drupaletexp_block_responsive');
+  if ($animate != NULL) {
+    $library = libraries_get_libraries();
+    if (isset($library['appear'])) {
+      $path = $library['appear'];
+      drupal_add_js($path . '/jquery.appear.js');
+      drupal_add_js(drupal_get_path('module', 'drupaletexp_animation') . '/js/drupaletexp_animation.js');
+      drupal_add_css(drupal_get_path('module', 'drupaletexp_animation') . '/css/animate.css');
+    }
+    $vars['classes_array'][] = 'animate';
+    $vars['attributes_array']['data-anim-type'] = $animate;
+  }
+  if ($background_color != NULL) {
+	$vars['attributes_array']['data-color'] = $background_color;
+  }
+  if ($block_title != NULL) {
+	$vars['attributes_array']['data-title'] = $block_title;
+  }
+  if (!empty($responsive)) {
+    //foreach($responsive as $device){
+    if ($responsive['hphone']) {
+      $vars['classes_array'][] = 'hidden-xs';
+    }
+    if ($responsive['vphone']) {
+      $vars['classes_array'][] = 'visible-xs';
+    }
+    if ($responsive['htablet']) {
+      $vars['classes_array'][] = 'hidden-sm';
+    }
+    if ($responsive['vtablet']) {
+      $vars['classes_array'][] = 'visible-sm';
+    }
+    if ($responsive['hdesktop']) {
+      $vars['classes_array'][] = 'hidden-md';
+      $vars['classes_array'][] = 'hidden-lg';
+    }
+    if ($responsive['vdesktop']) {
+      $vars['classes_array'][] = 'visible-md';
+      $vars['classes_array'][] = 'visible-lg';
+    }
+    //}
+  }
+  $styles = array();
+  if (!empty($text_align) && $text_align != 'default') {
+    $styles[] = 'text-align:' . $text_align;
+  }
+  if ($padding) {
+    $styles[] = 'padding:' . $padding;
+  }
+  if ($margin) {
+    $styles[] = 'margin:' . $margin;
+  }
+  if (isset($background_image['fid']) && $background_image['fid']) {
+    $file = file_load($background_image['fid']);
+    $url = file_create_url($file->uri);
+    $styles[] = "background-image:url({$url}); background-position:{$background_position};";
+	if ($background_image_type == 'fixed') {
+		$styles[] .= "background-attachment:fixed;";
+	} elseif ($background_image_type == 'parallax') {
+      $vars['classes_array'][] = 'drupaletexp-parallax';
+      $library = libraries_get_libraries();
+      if (isset($library['stellar'])) {
+        $path = $library['stellar'];
+        drupal_add_js($path . '/jquery.stellar.min.js');
+        drupal_add_js(drupal_get_path('module', 'drupaletexp_animation') . '/js/iscroll.js');
+        drupal_add_js(drupal_get_path('module', 'drupaletexp_animation') . '/js/drupaletexp_animation_parallax.js');
+      }
+      $vars['attributes_array']['data-stellar-background-ratio'] = '0.5';
+      //$vars['content_attributes_array']['class'][] = 'container';
+    }
+  }
+  if (!empty($styles)) {
+    $vars['attributes_array']['style'] = implode(";", $styles);
+  }
+}
+
+function _drupaletexp_animation_variable_set($module, $delta, $name, $value) {
+  variable_set($module . $delta . $name, $value);
+}
+
+function _drupaletexp_animation_variable_get($module, $delta, $name) {
+  return variable_get($module . $delta . $name, NULL);
+}
+
+function _drupaletexp_animation_animations() {
+  return array(
+      '' => 'None',
+      'flash' => 'flash',
+      'shake' => 'shake',
+      'bounce' => 'bounce',
+      'tada' => 'tada',
+      'swing' => 'swing',
+      'wobble' => 'wobble',
+      'pulse' => 'pulse',
+      'flip' => 'flip',
+      'flipInX' => 'flipInX',
+      'flipInY' => 'flipInY',
+      'fadeIn' => 'fadeIn',
+      'fadeInUp' => 'fadeInUp',
+      'fadeInDown' => 'fadeInDown',
+      'fadeInLeft' => 'fadeInLeft',
+      'fadeInRight' => 'fadeInRight',
+      'fadeInUpBig' => 'fadeInUpBig',
+      'fadeInDownBig' => 'fadeInDownBig',
+      'fadeInLeftBig' => 'fadeInLeftBig',
+      'fadeInRightBig' => 'fadeInRightBig',
+      'slideInDown' => 'slideInDown',
+      'slideInLeft' => 'slideInLeft',
+      'slideInRight' => 'slideInRight',
+      'bounceIn' => 'bounceIn',
+      'bounceInUp' => 'bounceInUp',
+      'bounceInDown' => 'bounceInDown',
+      'bounceInLeft' => 'bounceInLeft',
+      'bounceInRight' => 'bounceInRight',
+      'rotateIn' => 'rotateIn',
+      'rotateInUpLeft' => 'rotateInUpLeft',
+      'rotateInDownLeft' => 'rotateInDownLeft',
+      'rotateInUpRight' => 'rotateInUpRight',
+      'rotateInDownRight' => 'rotateInDownRight',
+      'lightSpeedIn' => 'lightSpeedIn',
+      'lightSpeedLeft' => 'lightSpeedLeft',
+      'lightSpeedRight' => 'lightSpeedRight',
+      'hinge' => 'hinge',
+      'rollIn' => 'rollIn',
+  );
+}

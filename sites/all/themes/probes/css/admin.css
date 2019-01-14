@@ -1,0 +1,15 @@
+.form-managed-file span.file {
+	display: inline-block;
+    height: 80px;
+    line-height: 80px;
+}
+.form-managed-file .file img {
+	display: inline-block;
+	float: left;
+	margin-right: 5px;
+	border: 2px solid #ddd;
+}
+.form-managed-file .file a {
+	display: inline-block;
+	font-size: 18px;
+}

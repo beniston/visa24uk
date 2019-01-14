@@ -1,0 +1,10 @@
+name = "Webcam Snapshot"
+description = "Provides a form element for taking snapshots from a webcam. Needs a browser that supports getUserMedia."
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2016-02-24
+version = "7.x-1.0-rc1"
+core = "7.x"
+project = "webcam_snapshot"
+datestamp = "1456323840"
+
