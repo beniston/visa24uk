@@ -46,6 +46,14 @@ function field_formatter_class_field_formatter_settings_form_alter(&$settings_fo
     '#title' => t('Field Formatter Class'),
     '#default_value' => $settings['field_formatter_class'],
   );
+  if (module_exists('token')) {
+    $settings_form['field_formatter_class_token'] = array(
+      '#type' => 'container',
+      '#theme' => 'token_tree',
+      '#token_types' => array($context['instance']['entity_type']),
+      '#dialog' => TRUE,
+    );
+  }
 }
 
 /**
@@ -59,11 +67,18 @@ function field_formatter_class_preprocess_field(&$variables, $hook) {
   $field_name  = $variables['element']['#field_name'];
   $bundle      = $variables['element']['#bundle'];
   $view_mode   = $variables['element']['#view_mode'];
+  $object      = $variables['element']['#object'];
 
   $formatter_info = field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode);
 
   // add class for whole field
   if (!empty($formatter_info['field_formatter_class'])) {
-    $variables['classes_array'][] = filter_xss($formatter_info['field_formatter_class'], array());
+    $class = $formatter_info['field_formatter_class'];
+    if (module_exists('token')) {
+      $class = token_replace($class, array($entity_type => $object));
+    }
+    $class = filter_xss($class, array());
+
+    $variables['classes_array'][] = $class;
   }
 }

@@ -26,11 +26,12 @@ $plugin = array(
 function snapengage_snapengage_widget_content_type_render($subtype, $conf, $panel_args, $pane_context, $incoming_content) {
   $block = new stdClass();
 
+  $widget_id = ctools_context_keyword_substitute($conf['snapengage_widget_id'], array(), $pane_context);
   // Add widget code if there's a widget id.
   $allowed_tags = array();
-    if (!empty($conf['snapengage_widget_id'])) {
+    if (!empty($widget_id)) {
       _snapengage_add_snapengage_script(
-        filter_xss($conf['snapengage_widget_id'], $allowed_tags),
+        filter_xss($widget_id, $allowed_tags),
         $conf['snapengage_widget_language']
       );
     }

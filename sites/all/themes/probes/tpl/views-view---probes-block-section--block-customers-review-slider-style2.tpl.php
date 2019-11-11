@@ -9,7 +9,7 @@
 			$new = '</div><div class="item"><div class="col-md-4 col-sm-4">';
 			$rows = trim(str_replace($old, $new, $rows));
 			$rows = substr($rows, 6);
-			$rows = str_replace_first('class="item', 'class="item active', $rows);
+			//$rows = str_replace_first('class="item', 'class="item active', $rows);
 			$rows = $rows.'</div>';
 			$n = substr_count($rows, 'class="item');
 		?>

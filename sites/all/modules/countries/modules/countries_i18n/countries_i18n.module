@@ -30,6 +30,7 @@ function countries_i18n_i18n_string_info() {
     'description' => t('Country names for localization.'),
     'format' => FALSE,
     'list' => TRUE,
+    'refresh callback' => 'countries_i18n_string_refresh',
   );
   return $groups;
 }
@@ -90,9 +91,9 @@ function countries_i18n_country_delete($info) {
 }
 
 /**
- * Implements hook_i18n_string_refresh().
+ * i18n_string callback for refreshing all strings.
  */
-function countries_i18n_i18n_string_refresh() {
+function countries_i18n_string_refresh() {
   // Direct db calls to avoid potential calls to countries_translate().
   $result = countries_get_countries();
   foreach ($result as $country) {

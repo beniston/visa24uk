@@ -111,15 +111,11 @@
 
             <div class="navbar yamm navbar-default">
                 <!-- New address -->
-                <div class="container">
+<div class="container">
                   <p style="padding:10px 20px; background:#b3e000;">
-                    
-In accordance with Chinese laws and regulations,  as of 12th November 2018, the Chinese Visa Application Service Centers in London, Manchester and Edinburgh will capture 10 fingerprints of visa applicants on behalf of the Chinese Embassy and Consulates in the U.K..
-
-This means all applicants will have to attend the Visa Application Centre in person, no matter what type of visa is applied for. 
-
+Visa24! A one stop destination for all your Visa needs!
 We have offices in London and Manchester. Please choose your nearest office.
-                  </p>
+</p>
                 </div>
 
                 <div class="container">

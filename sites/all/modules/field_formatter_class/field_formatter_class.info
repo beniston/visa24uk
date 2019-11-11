@@ -5,9 +5,9 @@ package = Fields
 dependencies[] = field
 dependencies[] = field_formatter_settings
 
-; Information added by drupal.org packaging script on 2013-02-20
-version = "7.x-1.1"
+; Information added by Drupal.org packaging script on 2018-04-01
+version = "7.x-1.2"
 core = "7.x"
 project = "field_formatter_class"
-datestamp = "1361374877"
+datestamp = "1522603384"
 

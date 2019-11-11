@@ -170,9 +170,8 @@ function countries_views_data() {
     'help' => t('The continent of this country.'),
     'real field' => 'continent',
     'filter' => array(
-      'handler' => 'views_handler_filter_in_operator',
+      'handler' => 'views_handler_filter_countries_continents_list',
       'property' => 'continent',
-      'options callback' => 'countries_get_continents',
     ),
   );
 

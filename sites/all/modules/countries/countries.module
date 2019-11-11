@@ -172,11 +172,9 @@ function countries_entity_info() {
   $return = array(
     'country' => array(
       'label' => t('Country'),
-      'plural label' => t('Countries'),
       'entity class' => 'Entity',
       'controller class' => 'EntityAPIControllerExportable',
       'base table' => 'countries_country',
-      'token type' => 'country',
       'fieldable' => TRUE,
       'module' => 'countries',
       'entity keys' => array(
@@ -671,26 +669,7 @@ function countries_invoke_additional_countries_alter(&$countries) {
  *   An array of countries ordered by name or by the specified property.
  */
 function countries_get_countries($property = 'all', $filters = array()) {
-  // Since this contains quite some operations cache the results at least for
-  // this request.
-  $cache = &drupal_static(__FUNCTION__, array());
-  $cid = md5($property . serialize($filters));
-  if (isset($cache[$cid])) {
-    return $cache[$cid];
-  }
-
-  // Special construct to store the country codes once we fetched all. This will
-  // speed up loading the entities if a second call is made - even with other
-  // parameters, this is because this way we can hit the entity cache.
-  $country_codes_cid = __FUNCTION__ . ':entity_ids';
-  $country_codes = FALSE;
-  if (isset($cache[$country_codes_cid])) {
-    $country_codes = $cache[$country_codes_cid];
-  }
-  $countries = entity_load_multiple_by_name('country', $country_codes);
-  if (!isset($cache[$country_codes_cid])) {
-    $cache[$country_codes_cid] = array_keys($countries);
-  }
+  $countries = entity_load_multiple_by_name('country');
 
   $filtered_countries = countries_filter($countries, $filters);
 
@@ -718,7 +697,6 @@ function countries_get_countries($property = 'all', $filters = array()) {
     }
   }
   uasort($mapped_countries, 'countries_sort');
-  $cache[$cid] = $mapped_countries;
   return $mapped_countries;
 }
 
